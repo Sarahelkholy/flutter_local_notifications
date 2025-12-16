@@ -17,6 +17,7 @@ class LocalNotificationsService {
     );
   }
 
+  /// basic notifications
   static void showBasicNotification() async {
     NotificationDetails details = const NotificationDetails(
       android: AndroidNotificationDetails(
@@ -32,6 +33,34 @@ class LocalNotificationsService {
       'Basic notification',
       'This is a basic notification',
       details,
+      payload: 'Payload Data',
     );
+  }
+
+  /// repeated notifications
+  static void showRepeatedNotification() async {
+    NotificationDetails details = const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'id2',
+        'Repeated Notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    );
+    await flutterLocalNotificationsPlugin.periodicallyShow(
+      1,
+      'Repeated notification',
+      'This is a repeated notification',
+      RepeatInterval.everyMinute,
+      details,
+      payload: 'Payload Data',
+      androidScheduleMode: AndroidScheduleMode.exact,
+    );
+  }
+
+  /// cancel
+  static void cancelNotification(int id) async {
+    await flutterLocalNotificationsPlugin.cancel(id);
   }
 }
