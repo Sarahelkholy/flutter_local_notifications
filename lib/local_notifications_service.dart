@@ -1,4 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 class LocalNotificationsService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -56,6 +59,33 @@ class LocalNotificationsService {
       details,
       payload: 'Payload Data',
       androidScheduleMode: AndroidScheduleMode.exact,
+    );
+  }
+
+  /// scheduel notifications
+  static void showScheduelNotification() async {
+    NotificationDetails details = const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'id3',
+        'Scheduel Notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    );
+    tz.initializeTimeZones();
+    final TimezoneInfo timeZoneInfo = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZoneInfo.identifier));
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      2,
+      'Scheduel notification',
+      'This is a scheduel notification',
+      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
+
+      // tz.TZDateTime(tz.local, 2025, 12, 17, 13, 42),
+      details,
+      payload: 'Payload Data',
+      androidScheduleMode: AndroidScheduleMode.inexact,
     );
   }
 
