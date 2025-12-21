@@ -22,12 +22,15 @@ class LocalNotificationsService {
 
   /// basic notifications
   static void showBasicNotification() async {
-    NotificationDetails details = const NotificationDetails(
+    NotificationDetails details = NotificationDetails(
       android: AndroidNotificationDetails(
         'id1',
         'Basic Notifications',
         importance: Importance.max,
         priority: Priority.high,
+        sound: RawResourceAndroidNotificationSound(
+          'sound.wav'.split('.').first,
+        ),
       ),
       iOS: DarwinNotificationDetails(),
     );
