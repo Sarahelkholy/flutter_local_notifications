@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -6,7 +8,11 @@ import 'package:timezone/data/latest.dart' as tz;
 class LocalNotificationsService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-  static onTap(NotificationResponse notificationResponse) {}
+  static StreamController<NotificationResponse> notificationsStream =
+      StreamController();
+  static onTap(NotificationResponse notificationResponse) {
+    notificationsStream.add(notificationResponse);
+  }
 
   static Future init() async {
     InitializationSettings settings = const InitializationSettings(
@@ -83,11 +89,11 @@ class LocalNotificationsService {
       2,
       'Scheduel notification',
       'This is a scheduel notification',
-      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
+      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
 
       // tz.TZDateTime(tz.local, 2025, 12, 17, 13, 42),
       details,
-      payload: 'Payload Data',
+      payload: 'This is a scheduel notification',
       androidScheduleMode: AndroidScheduleMode.inexact,
     );
   }
