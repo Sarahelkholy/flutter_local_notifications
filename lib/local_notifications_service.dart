@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -12,6 +13,28 @@ class LocalNotificationsService {
       StreamController();
   static onTap(NotificationResponse notificationResponse) {
     notificationsStream.add(notificationResponse);
+  }
+
+  static Future<FlutterLocalNotificationsPlugin> initPlugin() async {
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+
+    // Initialize Android + iOS settings
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: DarwinInitializationSettings(),
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(initSettings);
+
+    // Initialize timezone
+    tz.initializeTimeZones();
+    final TimezoneInfo timeZone = (await FlutterTimezone.getLocalTimezone());
+    tz.setLocalLocation(tz.getLocation(timeZone.identifier));
+
+    return flutterLocalNotificationsPlugin;
   }
 
   static Future init() async {
@@ -95,6 +118,49 @@ class LocalNotificationsService {
       details,
       payload: 'This is a scheduel notification',
       androidScheduleMode: AndroidScheduleMode.inexact,
+    );
+  }
+
+  ///daily scheduel notifications
+
+  static Future<void> showDailyScheduledNotification(
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+  ) async {
+    final AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'daily_id',
+          'Daily Notifications',
+          importance: Importance.max,
+          priority: Priority.high,
+        );
+
+    final NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledTime = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      now.hour,
+      30,
+    );
+
+    if (scheduledTime.isBefore(now)) {
+      scheduledTime = scheduledTime.add(const Duration(hours: 10));
+      log('Scheduled time updated: $scheduledTime');
+    }
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      3,
+      'Daily Scheduled Notification',
+      'This is a daily scheduled notification',
+      scheduledTime,
+      notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.inexact,
+      payload: 'zonedSchedule',
     );
   }
 
